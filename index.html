@@ -1,0 +1,73 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <title>HW5</title>
+        <!-- check out https://developer.mozilla.org/en-US/docs/Web/API/Web_components -->
+    </head>
+    <body>
+        <rating-widget>
+            <form action="https://httpbin.org/post" method="POST">
+                <label for="rating">How satisfied are you?</label>
+                <input type="hidden" name="question" value="How satisfied are you?">
+                <input type="hidden" name="sentBy" value="HTML">
+                <input type="number" id="rating" name="rating" min="1" max="5" value="0" required>
+                <button type="submit">Submit</button>
+            </form>
+        </rating-widget>
+        <template id="ratingWidgetTemplate">
+            <style>
+              /* CSS for styling the rating widget */
+              .rating {
+                display: inline-block;
+                font-size: 24px;
+              }
+              .rating .star {
+                color: #858585; /* Default star color */
+                cursor: pointer;
+              }
+              .rating .star:hover,
+              .rating .star.active {
+                color: #ffbb00; /* Star color on hover/selected */
+              }
+            </style>
+            <div class="rating"></div>
+          </template>
+    </body>
+    <script>
+        class ratingWidget extends HTMLElement{
+            constructor() {
+                super();
+            }
+            connectedCallback() {
+                const maxStars = Math.max(3, this.getAttribute('max') || 5);
+                const ratingTemplate = document.getElementById('ratingWidgetTemplate');
+                const shadowRoot = this.attachShadow({ mode: 'open' });
+                const templateContent = ratingTemplate.content.cloneNode(true);
+                const ratingDiv = templateContent.querySelector('.rating');
+
+                for (let i = 1; i <= 10 && i <= maxStars; i++) {
+                const star = document.createElement('span');
+                star.classList.add('star');
+                star.innerHTML = '&#9733;'; // Unicode character for star
+                star.addEventListener('click', () => this.handleRating(i));
+                ratingDiv.appendChild(star);
+                }
+
+                shadowRoot.appendChild(templateContent);
+            }
+            handleRating(rating) {
+                const max = Math.max(3, this.getAttribute('max') || 5);
+                const percentage = (rating / max) * 100;
+
+                if (percentage >= 80) {
+                alert('Thank you for your high rating! We appreciate your feedback.');
+                } else {
+                alert('Thank you for your rating.');
+                }
+            }
+        }
+
+        // Define the custom element
+        customElements.define('rating-widget', ratingWidget);
+    </script>
+</html>
