@@ -1,0 +1,101 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <title>Weather</title>
+        <!-- check out https://developer.mozilla.org/en-US/docs/Web/API/Web_components -->
+        <style>
+            html {
+                padding: 0;
+                margin: 0;
+            }
+            /* weather-widget{
+                font-family: 'Lucida Sans', 'Lucida Sans Regular', 'Lucida Grande', 'Lucida Sans Unicode', Geneva, Verdana, sans-serif;
+                font-size: 50px;
+                margin: 20px;
+                padding: 30px;
+                color:rgb(0, 99, 199);
+                background: rgb(255,253,38);
+                background: linear-gradient(90deg, rgba(255,253,38,0.5) 14%, rgba(95,255,251,0.5) 50%, rgba(0,113,181,0.5) 80%);
+                border-radius: 10px;
+            } */
+        </style>
+    </head>
+    <body>
+        <weather-widget>Current Weather Conditions Unavailable</weather-widget>
+    </body>
+    <script>
+        class Weather extends HTMLElement{
+            constructor() {
+                super();
+            }
+            connectedCallback() {
+                this.CityURL = 'https://api.weather.gov/points/32.84,-117.26';
+                this.WeatherURL = 'https://api.weather.gov/gridpoints/SGX/54.20/stations';
+                this.delay = parseInt(this.getAttribute('delay')) || 30;
+
+                this.attachShadow({ mode: 'open' });
+                this.shadowRoot.innerHTML = `
+                    <style>
+                        :host {
+                            display: block;
+                            padding: 1em;
+                            margin: 0 auto;
+                            max-width: 80%;
+                            border: 1px solid var(--border-color, #ddd);
+                            border-radius: var(--border-radius, 5px);
+                            position: relative;
+                            background: "sdbeach.jpeg";
+                        }
+                    </style>
+                    <h3 id="city"></h3>
+                    <p id="weather"></p>
+                `;
+
+                this.fetchWeather();
+            }
+            fetchWeather() {
+                const weatherElement = this.shadowRoot.getElementById('weather');
+                // weatherElement.style.opacity = 0;
+                let gridX = 0;
+                let gridY = 0;
+                setTimeout(() => {
+                    fetch(this.CityURL)
+                        .then(response => response.json())
+                        .then(data => {
+                            this.displayCity(data);
+                            gridX = data.properties.gridX;
+                            gridY = data.properties.gridY;
+                            console.log(data);
+                        })
+                        .catch(() => {
+                            // this.displayWeather("Slow network, loading...");
+                        });
+                }, 500);
+                this.WeatherURL
+                setTimeout(() => {
+                    fetch(this.WeatherURL)
+                        .then(response => response.json())
+                        .then(data => {
+                            this.displayCity(data);
+                            gridX = data.properties.gridX;
+                            gridY = data.properties.gridY;
+                            console.log(data);
+                        })
+                        .catch(() => {
+                            // this.displayWeather("Slow network, loading...");
+                        });
+                }, 500);
+            }
+            displayCity(data) {
+                let cityElement = this.shadowRoot.getElementById('city');
+                let city = data.properties.relativeLocation.properties['city'];
+                let state = data.properties.relativeLocation.properties['state'];
+                cityElement.textContent = 'Current Weather In: ' + city + ', ' + state;
+            }
+            displayWeather(data) {
+
+            }
+        }
+        customElements.define('weather-widget', Weather);
+    </script>
+</html>
