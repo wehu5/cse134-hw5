@@ -8,7 +8,7 @@
                 padding: 0;
                 margin: 0;
             }
-            /* weather-widget{
+            weather-widget{
                 font-family: 'Lucida Sans', 'Lucida Sans Regular', 'Lucida Grande', 'Lucida Sans Unicode', Geneva, Verdana, sans-serif;
                 font-size: 50px;
                 margin: 20px;
@@ -17,7 +17,7 @@
                 background: rgb(255,253,38);
                 background: linear-gradient(90deg, rgba(255,253,38,0.5) 14%, rgba(95,255,251,0.5) 50%, rgba(0,113,181,0.5) 80%);
                 border-radius: 10px;
-            } */
+            }
         </style>
     </head>
     <body>
@@ -30,7 +30,7 @@
             }
             connectedCallback() {
                 this.CityURL = 'https://api.weather.gov/points/32.84,-117.26';
-                this.WeatherURL = 'https://api.weather.gov/gridpoints/SGX/54.20/stations';
+                this.WeatherURL = 'https://api.weather.gov/gridpoints/SGX/54,20/forecast';
                 this.delay = parseInt(this.getAttribute('delay')) || 30;
 
                 this.attachShadow({ mode: 'open' });
@@ -41,44 +41,60 @@
                             padding: 1em;
                             margin: 0 auto;
                             max-width: 80%;
-                            border: 1px solid var(--border-color, #ddd);
-                            border-radius: var(--border-radius, 5px);
                             position: relative;
-                            background: "sdbeach.jpeg";
+                        }
+                        img {
+                            width: 2em;
+                            height: 2em;
+                        }
+                        p {
+                            display: inline-block;
+                            margin-left: 50px;
                         }
                     </style>
                     <h3 id="city"></h3>
-                    <p id="weather"></p>
+                    <section>
+                        <img id="weather-icon" src="" alt="weather icon">
+                        <p id="weather"></p>
+                    </section>
+                    <section>
+                        <img id="wind-icon" src="" alt="wind img">
+                        <p id="wind"></p>
+                    </section>
+                    <section>
+                        <img id="humidity-icon" src="" alt="humid img">
+                        <p id="humidity"></p?
+                    </section>
                 `;
+                this.weatherIcons = [
+                    'https://cdn-icons-png.flaticon.com/128/3222/3222672.png',
+                    'https://cdn-icons-png.flaticon.com/128/899/899718.png',
+                    'https://cdn-icons-png.flaticon.com/128/3313/3313888.png',
+                    'https://cdn-icons-png.flaticon.com/128/5420/5420103.png'
+                ];
 
                 this.fetchWeather();
             }
             fetchWeather() {
                 const weatherElement = this.shadowRoot.getElementById('weather');
                 // weatherElement.style.opacity = 0;
-                let gridX = 0;
-                let gridY = 0;
                 setTimeout(() => {
                     fetch(this.CityURL)
                         .then(response => response.json())
                         .then(data => {
                             this.displayCity(data);
-                            gridX = data.properties.gridX;
-                            gridY = data.properties.gridY;
                             console.log(data);
                         })
                         .catch(() => {
                             // this.displayWeather("Slow network, loading...");
                         });
                 }, 500);
-                this.WeatherURL
+
                 setTimeout(() => {
                     fetch(this.WeatherURL)
                         .then(response => response.json())
                         .then(data => {
-                            this.displayCity(data);
-                            gridX = data.properties.gridX;
-                            gridY = data.properties.gridY;
+                            this.displayWeather(data);
                             console.log(data);
                         })
                         .catch(() => {
@@ -90,10 +106,47 @@
                 let cityElement = this.shadowRoot.getElementById('city');
                 let city = data.properties.relativeLocation.properties['city'];
                 let state = data.properties.relativeLocation.properties['state'];
-                cityElement.textContent = 'Current Weather In: ' + city + ', ' + state;
+                cityElement.textContent = 'Current Weather In ' + city + ', ' + state;
             }
-            displayWeather(data) {
 
+            displayWeather(data) {
+                let weatherElement = this.shadowRoot.getElementById('weather');
+                let windElement = this.shadowRoot.getElementById('wind');
+                let humidityElement = this.shadowRoot.getElementById('humidity');
+
+
+                let temperature = data.properties.periods[0].temperature;
+                let tempUnit = data.properties.periods[0].temperatureUnit;
+                let status = data.properties.periods[0].shortForecast;
+
+                let windSpeed = data.properties.periods[0].windSpeed;
+                let windDir = data.properties.periods[0].windDirection;
+
+                let humid = data.properties.periods[0].relativeHumidity.value;
+
+                let weatherIcon = this.shadowRoot.getElementById('weather-icon');
+                if(status.indexOf('Sunny') != -1) {
+                    weatherIcon.setAttribute('src', this.weatherIcons[0]);
+                }
+                else if(status.indexOf('Cloudy') != -1) {
+                    weatherIcon.setAttribute('src', this.weatherIcons[1]);
+                }
+                else if(status.indexOf('Rain') != -1 || status.indexOf('Shower') != -1) {
+                    weatherIcon.setAttribute('src', this.weatherIcons[2]);
+                }
+                else if(status.indexOf('Snow') != -1) {
+                    weatherIcon.setAttribute('src', this.weatherIcons[3]);
+                }
+                console.log(status + ', ' + temperature + ' ' + tempUnit);
+                weatherElement.textContent = status + ', ' + temperature + ' ' + tempUnit;
+
+                let windIcon = this.shadowRoot.getElementById('wind-icon');
+                windIcon.setAttribute('src', 'https://cdn-icons-png.flaticon.com/128/481/481476.png');
+                windElement.textContent = 'Wind speed is ' + windSpeed + ' with direction ' + windDir;
+
+                let humidIcon = this.shadowRoot.getElementById('humidity-icon');
+                humidIcon.setAttribute('src', 'https://cdn-icons-png.flaticon.com/128/2828/2828733.png');
+                humidityElement.textContent = 'Humidity: ' + humid + '%';
             }
         }
         customElements.define('weather-widget', Weather);
