@@ -16,21 +16,31 @@
         </rating-widget>
         <template id="ratingWidgetTemplate">
             <style>
-              /* CSS for styling the rating widget */
-              .rating {
-                display: inline-block;
-                font-size: 24px;
-              }
-              .rating .star {
-                color: #858585; /* Default star color */
-                cursor: pointer;
-              }
-              .rating .star:hover,
-              .rating .star.active {
-                color: #ffbb00; /* Star color on hover/selected */
-              }
+                input {
+                    opacity: 0;
+                }
+                .rating {
+                    direction: rtl;
+                    display: inline-block;
+                    font-size: 24px;
+                    & p {
+                        direction: ltr;
+                    }
+                }
+                .rating .star {
+                    color: #858585; /* Default star color */
+                    cursor: pointer;
+                }
+                
+                .rating > .star:hover:before,
+                .rating > .star:hover ~ .star:before {
+                    content: "\2605";
+                    position: absolute;
+                    color: #ffbb00;
+                }
             </style>
-            <div class="rating"></div>
+            <h3>How satisfied are you?</h3>
+            <form class="rating" sentBy="JS"></form>
           </template>
     </body>
     <script>
@@ -46,27 +56,45 @@
                 const ratingDiv = templateContent.querySelector('.rating');
 
                 for (let i = 1; i <= 10 && i <= maxStars; i++) {
-                const star = document.createElement('span');
-                star.classList.add('star');
-                star.innerHTML = '&#9733;'; // Unicode character for star
-                star.addEventListener('click', () => this.handleRating(i));
-                ratingDiv.appendChild(star);
+                    const score = document.createElement('input');
+                    score.setAttribute('type', 'submit');
+                    score.setAttribute('value', i)
+                    const star = document.createElement('span');
+                    star.classList.add('star');
+                    star.innerHTML = '&#9733'; // Unicode character for star
+                    star.addEventListener('click', () => this.handleRating(i, ratingDiv));
+                    ratingDiv.appendChild(score);
+                    ratingDiv.appendChild(star);
                 }
 
                 shadowRoot.appendChild(templateContent);
             }
-            handleRating(rating) {
+            handleRating(rating, parent) {
                 const max = Math.max(3, this.getAttribute('max') || 5);
+                rating = max - rating + 1;
                 const percentage = (rating / max) * 100;
-
+                let feedbackNode = document.createElement('p');
                 if (percentage >= 80) {
-                alert('Thank you for your high rating! We appreciate your feedback.');
+                    feedbackNode.innerHTML = 'Thank you for your high rating of ' + rating + '! We appreciate your feedback!';
                 } else {
-                alert('Thank you for your rating.');
+                    feedbackNode.innerHTML = 'Thank you for your rating of ' + rating + '. We\'ll try to do better!';
                 }
+                parent.appendChild(feedbackNode);
+                let formData = new FormData();
+                formData.append('question', 'How satisfied are you');
+                formData.append('rating', rating);
+                formData.append('sentBy', parent.getAttribute('sentBy'));
+                fetch("https://httpbin.org/post", {
+                    method: "POST",
+                    body: formData,
+                    headers: {
+                        'X-Sent-By': 'JavaScript'
+                    }
+                })
+                .then((response) => response.json())
+                .then((data) => console.log(data));
             }
         }
-
         // Define the custom element
         customElements.define('rating-widget', ratingWidget);
     </script>
