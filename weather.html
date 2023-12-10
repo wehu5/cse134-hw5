@@ -67,10 +67,10 @@
                     </section>
                 `;
                 this.weatherIcons = [
-                    'https://cdn-icons-png.flaticon.com/128/3222/3222672.png',
-                    'https://cdn-icons-png.flaticon.com/128/899/899718.png',
-                    'https://cdn-icons-png.flaticon.com/128/3313/3313888.png',
-                    'https://cdn-icons-png.flaticon.com/128/5420/5420103.png'
+                    'icons/sun.png',
+                    'icons/cloud.png',
+                    'icons/rain.png',
+                    'icons/snow.png'
                 ];
 
                 this.fetchWeather();
@@ -141,11 +141,11 @@
                 weatherElement.textContent = status + ', ' + temperature + ' ' + tempUnit;
 
                 let windIcon = this.shadowRoot.getElementById('wind-icon');
-                windIcon.setAttribute('src', 'https://cdn-icons-png.flaticon.com/128/481/481476.png');
+                windIcon.setAttribute('src', 'icons/wind.png');
                 windElement.textContent = 'Wind speed is ' + windSpeed + ' with direction ' + windDir;
 
                 let humidIcon = this.shadowRoot.getElementById('humidity-icon');
-                humidIcon.setAttribute('src', 'https://cdn-icons-png.flaticon.com/128/2828/2828733.png');
+                humidIcon.setAttribute('src', 'icons/humidity.png');
                 humidityElement.textContent = 'Humidity: ' + humid + '%';
             }
         }
