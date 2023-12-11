@@ -50,6 +50,7 @@
                         p {
                             display: inline-block;
                             margin-left: 50px;
+                            font-size: 40px;
                         }
                     </style>
                     <h3 id="city"></h3>
@@ -138,7 +139,7 @@
                     weatherIcon.setAttribute('src', this.weatherIcons[3]);
                 }
                 console.log(status + ', ' + temperature + ' ' + tempUnit);
-                weatherElement.textContent = status + ', ' + temperature + ' ' + tempUnit;
+                weatherElement.innerHTML = status + ', ' + temperature + '&#176' + tempUnit;
 
                 let windIcon = this.shadowRoot.getElementById('wind-icon');
                 windIcon.setAttribute('src', 'icons/wind.png');
